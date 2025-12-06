@@ -89,3 +89,32 @@ VITE_SUPABASE_ANON_KEY=...
 
 - For production, use a managed PostgreSQL database (e.g., Supabase, Neon, AWS RDS).
 - Update `DATABASE_URL` in the backend service configuration.
+
+## Vercel Deployment (Full Stack)
+
+This project is configured for Vercel.
+
+1.  **Push to GitHub**: Ensure your repo is up to date (`api/index.py`, `vercel.json` included).
+2.  **Import to Vercel**:
+    - Select your repository.
+    - **Framework Preset**: Vite (should detect automatically).
+    - **Root Directory**: `./` (Leave default).
+3.  **Environment Variables**:
+    - Add these in Project Settings > Environment Variables:
+    
+    | Variable | Value Setup |
+    |----------|-------------|
+    | `DATABASE_URL` | `postgres://user:pass@host:5432/db` (From Supabase Connection String) |
+    | `APP_SECRET_KEY` | Generate a strong random string |
+    | `CORS_ORIGINS` | `["https://your-vercel-project.vercel.app"]` |
+    | `VITE_API_URL` | `/api` (or fully qualified URL if separate) |
+    | `VITE_SUPABASE_URL` | From Supabase Settings |
+    | `VITE_SUPABASE_ANON_KEY` | From Supabase Settings |
+
+### Supabase Integration
+
+1.  Create a Supabase Project.
+2.  Go to **Project Settings > Database** and get the Connection String (URI). Use this for `DATABASE_URL` in Vercel.
+3.  Go to **API** settings to get URL and Key for Frontend variables.
+4.  **Important**: Run the SQL scripts from `docs/SUPABASE_SETUP.md` in the Supabase SQL Editor to set up authentication tables/triggers.
+
