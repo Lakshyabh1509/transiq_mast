@@ -117,4 +117,11 @@ This project is configured for Vercel.
 2.  Go to **Project Settings > Database** and get the Connection String (URI). Use this for `DATABASE_URL` in Vercel.
 3.  Go to **API** settings to get URL and Key for Frontend variables.
 4.  **Important**: Run the SQL scripts from `docs/SUPABASE_SETUP.md` in the Supabase SQL Editor to set up authentication tables/triggers.
+5.  **Code Integration**: You MUST replace the mock authentication in `frontend/src/context/AuthContext.tsx` with result from `docs/SUPABASE_SETUP.md` (Step 6).
+6.  **Login Verification Setup** (Crucial for Emails):
+    - Go to Supabase Dashboard > **Authentication > URL Configuration**.
+    - Set **Site URL** to your **Vercel Deployment URL** (e.g., `https://transactiq.vercel.app`).
+    - Add it to **Redirect URLs** as well.
+    - This ensures that when users click "Confirm Email", they are redirected to your live site, not localhost.
+
 
