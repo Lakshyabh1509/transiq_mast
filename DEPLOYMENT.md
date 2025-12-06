@@ -1,127 +1,147 @@
-# Deployment Guide
+# TransactIQ Deployment Guide
 
-This guide explains how to deploy the TransactIQ application.
+Complete guide for deploying TransactIQ with Supabase authentication.
 
-## Prerequisites
+---
 
-- **Git**: For version control.
-- **Node.js** (v18+): For the frontend.
-- **Python** (v3.11+): For the backend.
-- **PostgreSQL** (Optional, recommended for production): Database.
+## 🚀 Quick Deploy to Vercel (Recommended)
 
-## Environment Setup
+### Prerequisites
+- GitHub account with your repository pushed
+- Vercel account (free at [vercel.com](https://vercel.com))
+- Supabase project (free at [supabase.com](https://supabase.com))
 
-The application uses environment variables for configuration. **You must set these up manually** as they are not committed to the repository for security.
+### Step 1: Push to GitHub
 
-### Backend (`backend/.env`)
-
-Create a file named `.env` in the `backend` directory:
-
-```env
-DATABASE_URL=postgresql://user:password@host:5432/transactiq
-# OR for SQLite (Local/Dev):
-# DATABASE_URL=sqlite:///./transactiq.db
-
-REDIS_URL=redis://localhost:6379
-APP_SECRET_KEY=your-production-secret-key
-CORS_ORIGINS=["https://your-frontend-domain.com"]
-DEBUG=false
+```bash
+cd c:\Users\Lakshya\Downloads\final\mastercard
+git add .
+git commit -m "Prepared for deployment"
+git push origin main
 ```
+
+### Step 2: Deploy Frontend to Vercel
+
+1. Go to [vercel.com/new](https://vercel.com/new)
+2. Import your GitHub repository
+3. Configure:
+   - **Framework Preset**: Vite
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+
+4. Add Environment Variables:
+
+| Variable | Value |
+|----------|-------|
+| `VITE_SUPABASE_URL` | `https://szegtjuweskhkllmdtie.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6ZWd0anV3ZXNraGtsbG1kdGllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ5OTk0MzQsImV4cCI6MjA4MDU3NTQzNH0.lvKtmvYDST5ngIZGOLhIrILUVxy8s9pSVQp1X2WZ5GM` |
+| `VITE_API_URL` | `/api` (or your backend URL) |
+
+5. Click **Deploy**
+
+### Step 3: Configure Supabase for Production
+
+After deployment, go to your Supabase Dashboard:
+
+1. **Authentication → URL Configuration**:
+   - **Site URL**: `https://your-project.vercel.app`
+   - **Redirect URLs**: Add `https://your-project.vercel.app/*`
+
+2. **Authentication → Email Templates** (Optional):
+   - Customize confirmation email branding
+
+---
+
+## 📁 Project Structure
+
+```
+mastercard/
+├── frontend/          # React + Vite app
+│   ├── src/
+│   ├── .env           # ⚠️ NOT committed (in .gitignore)
+│   └── package.json
+├── backend/           # FastAPI backend (optional)
+│   ├── app/
+│   └── requirements.txt
+├── docs/              # Documentation
+└── .gitignore         # Excludes .env files
+```
+
+---
+
+## 🔐 Environment Variables
 
 ### Frontend (`frontend/.env`)
-
-Create a file named `.env` in the `frontend` directory:
-
 ```env
-VITE_API_URL=https://your-backend-domain.com
-VITE_SUPABASE_URL=...
-VITE_SUPABASE_ANON_KEY=...
+VITE_API_URL=http://localhost:8000
+VITE_SUPABASE_URL=https://szegtjuweskhkllmdtie.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-## Local Deployment
+> ⚠️ **Never commit `.env` files!** They are in `.gitignore`.
 
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/Lakshyabh1509/transiq_mast.git
-    cd transiq_mast
-    ```
+### Backend (`backend/.env`) - If using backend
+```env
+DATABASE_URL=postgresql://user:password@host:5432/transactiq
+REDIS_URL=redis://localhost:6379
+APP_SECRET_KEY=your-secret-key
+CORS_ORIGINS=["https://your-frontend.vercel.app"]
+```
 
-2.  **Backend Setup**:
-    ```bash
-    cd backend
-    python -m venv venv
-    # Windows:
-    .\venv\Scripts\activate
-    # Linux/Mac:
-    # source venv/bin/activate
-    
-    pip install -r requirements.txt
-    uvicorn app.main:app --host 0.0.0.0 --port 8000
-    ```
+---
 
-3.  **Frontend Setup**:
-    ```bash
-    cd frontend
-    npm install
-    npm run build
-    npm run preview --host
-    ```
+## 🧪 Local Development
 
-## Cloud Deployment
+### Frontend Only (with Supabase)
+```bash
+cd frontend
+npm install
+npm run dev
+# Opens at http://localhost:5173
+```
 
-### Backend (e.g., Render, Railway)
+### Full Stack (Frontend + Backend)
+```bash
+# Terminal 1 - Backend
+cd backend
+python -m venv venv
+.\venv\Scripts\activate  # Windows
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
 
-1.  Connect your GitHub repository.
-2.  Root Directory: `backend`
-3.  Build Command: `pip install -r requirements.txt`
-4.  Start Command: `uvicorn app.main:app --host 0.0.0.0 --port 10000` (Use `$PORT`)
-5.  **Environment Variables**: Add all variables from `backend/.env` to the service dashboard.
+# Terminal 2 - Frontend
+cd frontend
+npm install
+npm run dev
+```
 
-### Frontend (e.g., Vercel, Netlify)
+---
 
-1.  Connect your GitHub repository.
-2.  Root Directory: `frontend`
-3.  Build Command: `npm run build`
-4.  Output Directory: `dist`
-5.  **Environment Variables**: Add variables from `frontend/.env` to the project settings.
+## ✅ Deployment Checklist
 
-## Database
+- [ ] `.env` files added to `.gitignore`
+- [ ] Pushed code to GitHub
+- [ ] Vercel project created with correct root directory (`frontend`)
+- [ ] Environment variables added in Vercel dashboard
+- [ ] Supabase Site URL configured for production domain
+- [ ] Tested signup/login on production URL
 
-- For production, use a managed PostgreSQL database (e.g., Supabase, Neon, AWS RDS).
-- Update `DATABASE_URL` in the backend service configuration.
+---
 
-## Vercel Deployment (Full Stack)
+## 🆘 Troubleshooting
 
-This project is configured for Vercel.
+| Issue | Solution |
+|-------|----------|
+| "NetworkError" on signup | Check `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are correct |
+| Email not received | Check Supabase Authentication settings, ensure email is enabled |
+| Redirect to localhost | Update Site URL in Supabase to your Vercel domain |
+| Build fails on Vercel | Ensure Root Directory is set to `frontend` |
 
-1.  **Push to GitHub**: Ensure your repo is up to date (`api/index.py`, `vercel.json` included).
-2.  **Import to Vercel**:
-    - Select your repository.
-    - **Framework Preset**: Vite (should detect automatically).
-    - **Root Directory**: `./` (Leave default).
-3.  **Environment Variables**:
-    - Add these in Project Settings > Environment Variables:
-    
-    | Variable | Value Setup |
-    |----------|-------------|
-    | `DATABASE_URL` | `postgres://user:pass@host:5432/db` (From Supabase Connection String) |
-    | `APP_SECRET_KEY` | Generate a strong random string |
-    | `CORS_ORIGINS` | `["https://your-vercel-project.vercel.app"]` |
-    | `VITE_API_URL` | `/api` (or fully qualified URL if separate) |
-    | `VITE_SUPABASE_URL` | From Supabase Settings |
-    | `VITE_SUPABASE_ANON_KEY` | From Supabase Settings |
+---
 
-### Supabase Integration
+## 📚 Resources
 
-1.  Create a Supabase Project.
-2.  Go to **Project Settings > Database** and get the Connection String (URI). Use this for `DATABASE_URL` in Vercel.
-3.  Go to **API** settings to get URL and Key for Frontend variables.
-4.  **Important**: Run the SQL scripts from `docs/SUPABASE_SETUP.md` in the Supabase SQL Editor to set up authentication tables/triggers.
-5.  **Code Integration**: You MUST replace the mock authentication in `frontend/src/context/AuthContext.tsx` with result from `docs/SUPABASE_SETUP.md` (Step 6).
-6.  **Login Verification Setup** (Crucial for Emails):
-    - Go to Supabase Dashboard > **Authentication > URL Configuration**.
-    - Set **Site URL** to your **Vercel Deployment URL** (e.g., `https://transactiq.vercel.app`).
-    - Add it to **Redirect URLs** as well.
-    - This ensures that when users click "Confirm Email", they are redirected to your live site, not localhost.
-
-
+- [Supabase Docs](https://supabase.com/docs)
+- [Vercel Docs](https://vercel.com/docs)
+- [Vite Deployment Guide](https://vitejs.dev/guide/static-deploy.html)

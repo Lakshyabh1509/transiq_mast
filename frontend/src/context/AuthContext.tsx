@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { supabase } from "../lib/supabase";
 
 // User types
 export interface User {
@@ -39,7 +40,7 @@ interface AuthContextType {
     logout: () => void;
     // Supabase-ready methods (to be implemented)
     signInWithSupabase?: (email: string, password: string) => Promise<boolean>;
-    signUpWithSupabase?: (email: string, password: string, name: string) => Promise<boolean>;
+    signUpWithSupabase?: (email: string, password: string, name: string) => Promise<{ success: boolean; error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -50,15 +51,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Check for existing session on mount
     useEffect(() => {
-        const storedUser = localStorage.getItem("analytics_user");
-        if (storedUser) {
-            try {
-                setUser(JSON.parse(storedUser));
-            } catch {
-                localStorage.removeItem("analytics_user");
+        // Native Supabase Session Check
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
+                setUser({
+                    id: session.user.id,
+                    email: session.user.email!,
+                    name: session.user.user_metadata.name || "User",
+                    role: session.user.user_metadata.role || "viewer",
+                });
+            } else {
+                // Fallback to local storage (or clear it)
+                const storedUser = localStorage.getItem("analytics_user");
+                if (storedUser) {
+                    try {
+                        setUser(JSON.parse(storedUser));
+                    } catch {
+                        localStorage.removeItem("analytics_user");
+                    }
+                }
             }
-        }
-        setIsLoading(false);
+            setIsLoading(false);
+        };
+        checkSession();
+
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            (_event, session) => {
+                if (session?.user) {
+                    setUser({
+                        id: session.user.id,
+                        email: session.user.email!,
+                        name: session.user.user_metadata.name || "User",
+                        role: session.user.user_metadata.role || "viewer",
+                    });
+                } else if (_event === 'SIGNED_OUT') {
+                    setUser(null);
+                    localStorage.removeItem("analytics_user");
+                }
+            }
+        );
+
+        return () => subscription.unsubscribe();
     }, []);
 
     // Persist user to localStorage
@@ -99,12 +134,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(DEMO_USERS[type]);
     };
 
-    const logout = () => {
+    const logout = async () => {
         setUser(null);
         localStorage.removeItem("analytics_user");
-        // TODO: Supabase sign out
-        // await supabase.auth.signOut();
+        await supabase.auth.signOut();
     };
+
+    const signInWithSupabase = async (email: string, password: string) => {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        })
+
+        if (error) return false
+
+        if (data.user) {
+            setUser({
+                id: data.user.id,
+                email: data.user.email!,
+                name: data.user.user_metadata.name || "User",
+                role: data.user.user_metadata.role || "viewer",
+            })
+        }
+
+        return true
+    }
+
+    const signUpWithSupabase = async (email: string, password: string, name: string) => {
+        try {
+            const { error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: { name, role: "viewer" }
+                }
+            });
+
+            if (error) {
+                return { success: false, error: error.message };
+            }
+
+            return { success: true, error: null };
+        } catch (err) {
+            return { success: false, error: "An unexpected error occurred during sign up" };
+        }
+    }
 
     return (
         <AuthContext.Provider
@@ -115,6 +189,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 login,
                 loginAsDemo,
                 logout,
+                signInWithSupabase,
+                signUpWithSupabase,
             }}
         >
             {children}

@@ -17,7 +17,7 @@ import {
 
 export function SignUp() {
     const navigate = useNavigate();
-    const { loginAsDemo } = useAuth();
+    const { loginAsDemo, signUpWithSupabase } = useAuth();
 
     const [formData, setFormData] = useState({
         name: "",
@@ -52,12 +52,21 @@ export function SignUp() {
 
         setIsSubmitting(true);
 
-        // Simulate signup delay (replace with Supabase)
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        setIsSubmitting(true);
 
-        // For demo, just redirect to login
-        setStep(2);
+        const { success, error: signUpError } = await signUpWithSupabase!(
+            formData.email,
+            formData.password,
+            formData.name
+        );
+
         setIsSubmitting(false);
+
+        if (success) {
+            setStep(2);
+        } else {
+            setError(signUpError || "Failed to create account. Please try again.");
+        }
     };
 
     const handleTryDemo = () => {

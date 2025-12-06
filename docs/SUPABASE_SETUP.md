@@ -246,3 +246,45 @@ Customize auth emails in **Authentication > Email Templates**:
 - [Supabase Docs](https://supabase.com/docs)
 - [Auth Helpers](https://supabase.com/docs/guides/auth)
 - [Row Level Security](https://supabase.com/docs/guides/auth/row-level-security)
+
+---
+
+## 📊 Data Entries Feature (New)
+
+Run this SQL to create the `data_entries` table for storing user data securely.
+
+```sql
+CREATE TABLE data_entries (
+  id BIGSERIAL PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  category TEXT NOT NULL,
+  data_value NUMERIC,
+  is_synthetic BOOLEAN DEFAULT false,
+  status TEXT DEFAULT 'active',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE data_entries ENABLE ROW LEVEL SECURITY;
+
+-- Policies
+CREATE POLICY "Users view own data" ON data_entries
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users insert own data" ON data_entries
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users update own data" ON data_entries
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users delete own data" ON data_entries
+  FOR DELETE USING (auth.uid() = user_id);
+```
+
+### Verification
+- Check **Table Editor**: `data_entries` exists.
+- Check **Authentication > Policies**: 4 policies should be present.
+

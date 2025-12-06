@@ -1,9 +1,10 @@
 # Environment variables
 .env
-backend/.env
-frontend/.env
+.env.local
+.env.*.local
 *.env
-
+frontend/.env
+backend/.env
 # Dependencies
 node_modules/
 dist/
