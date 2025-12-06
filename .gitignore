@@ -1,0 +1,29 @@
+# Environment variables
+.env
+backend/.env
+frontend/.env
+*.env
+
+# Dependencies
+node_modules/
+dist/
+build/
+backend/venv/
+__pycache__/
+
+# Database
+*.db
+*.sqlite
+backend/transactiq.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# System
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
