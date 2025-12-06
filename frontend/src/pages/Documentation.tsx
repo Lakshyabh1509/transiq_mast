@@ -10,7 +10,6 @@ import {
     Upload,
     Users,
     TrendingDown,
-    Settings,
     Shield,
     FileSpreadsheet,
 } from "lucide-react";

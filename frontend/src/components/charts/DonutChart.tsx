@@ -5,7 +5,6 @@ import {
     Cell,
     Tooltip,
     Legend,
-    TooltipProps,
 } from "recharts";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { ChartSkeleton } from "@/components/ui/Skeleton";
@@ -29,7 +28,7 @@ const COLORS = [
 function CustomTooltip({
     active,
     payload,
-}: TooltipProps<number, string>) {
+}: any) {
     if (active && payload && payload.length) {
         const data = payload[0].payload;
         return (

@@ -6,7 +6,6 @@ import {
     YAxis,
     CartesianGrid,
     Tooltip,
-    TooltipProps,
 } from "recharts";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { ChartSkeleton } from "@/components/ui/Skeleton";
@@ -24,7 +23,7 @@ function CustomTooltip({
     active,
     payload,
     label,
-}: TooltipProps<number, string>) {
+}: any) {
     if (active && payload && payload.length) {
         return (
             <div className="rounded-lg border bg-card p-3 shadow-lg">
